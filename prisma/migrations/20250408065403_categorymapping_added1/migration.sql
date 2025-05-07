@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "CategoryMapping" ALTER COLUMN "parentId" DROP DEFAULT,
+ALTER COLUMN "childId" DROP DEFAULT;

@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  categoryId   Int               @id @default(autoincrement())
+  categoryName String
+  childIds     Int[]
+  imageUrl     String?
+  isParent     Boolean           @default(false)
+  isShow       Boolean           @default(false) 
+
+
+  products     Product[]
+  childMappings CategoryMapping[] @relation("ChildCategories")
+  parentMappings CategoryMapping[] @relation("ParentCategories")
+}
+
+model CategoryMapping {
+  id        Int      @id @default(autoincrement())
+  parentId  Int      
+  childId   Int      
+
+  parent    Category @relation("ParentCategories", fields: [parentId], references: [categoryId])
+  child     Category @relation("ChildCategories", fields: [childId], references: [categoryId])
+
+}
+
+
+
+model Product {
+  productId   Int      @id @default(autoincrement())
+  productName String
+  price       Float?
+  brand       String?
+  categoryId  Int
+  description String
+  imageUrl    String
+  category    Category @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
+  favourites  Favourite[]
+  carts       Cart[] 
+  orderItems OrderItem[]
+
+}
+
+
+model Favourite {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  productId Int
+  product   Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+
+}
+
+
+model Cart {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int     @default(1)
+
+  product   Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+
+}
+model Order {
+  orderId        Int       @id @default(autoincrement())
+  userId         Int
+  totalAmount    Float
+  status         String    @default("PENDING")
+  paymentId      String?
+  trackingNumber String?
+  deliveryAddress String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+
+  items          OrderItem[]
+}
+
+model User {
+  userId      Int    @id @default(autoincrement())
+  name        String
+  email       String @unique
+  address     UserAddress[]
+}
+
+model UserAddress {
+  addressId   Int      @id @default(autoincrement())
+  userId      Int
+  line1       String
+  city        String
+  state       String
+  zip         String
+  user        User     @relation(fields: [userId], references: [userId])
+}
+
+
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  price      Float
+
+  order      Order    @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [productId], onDelete: Cascade)
+}
+
+
+
