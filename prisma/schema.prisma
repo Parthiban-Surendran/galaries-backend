@@ -43,18 +43,20 @@ model CategoryMapping {
 
 
 model Product {
-  productId   Int       @id @default(autoincrement())
-  productName String
-  price       Float?
-  brand       String?
-  categoryId  Int
-  description String
-  imageUrl    String
-  rating      Float     @default(0.0) // New field added with default value
-  category    Category  @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
-  favourites  Favourite[]
-  carts       Cart[] 
-  orderItems  OrderItem[]
+  productId       Int        @id @default(autoincrement())
+  productName     String
+  price           Float?
+  discountPercent Int?       // New field for discount percentage (e.g., 67)
+  discountedPrice Float?     // New field for discounted price (e.g., 812)
+  brand           String?
+  categoryId      Int
+  description     String
+  imageUrl        String
+  rating          Float      @default(0.0)
+  category        Category   @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
+  favourites      Favourite[]
+  carts           Cart[]
+  orderItems      OrderItem[]
 }
 
 
