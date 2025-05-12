@@ -266,6 +266,31 @@ router.post("/cart/add", async (req, res) => {
 
 
 // Get user's cart
+// router.get("/cart/:userId", async (req, res) => {
+//   const { userId } = req.params;
+
+//   try {
+//     const cartItems = await prisma.cart.findMany({
+//       where: { userId: parseInt(userId) },
+//       include: { product: true },
+//       orderBy: {
+//         productId: 'asc', // or 'id': 'asc' if that's your primary key
+//       },
+//     });
+    
+
+//     const totalItems = cartItems.length;
+
+//     res.json({
+//       totalItems,
+//       cartItems, // Flat, not nested inside 'items'
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
+
 router.get("/cart/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -274,21 +299,28 @@ router.get("/cart/:userId", async (req, res) => {
       where: { userId: parseInt(userId) },
       include: { product: true },
       orderBy: {
-        productId: 'asc', // or 'id': 'asc' if that's your primary key
+        productId: 'asc',
       },
     });
-    
 
     const totalItems = cartItems.length;
 
+    // Calculate total price
+    const totalPrice = cartItems.reduce((acc, item) => {
+      const price = item.product.discountedPrice || item.product.price || 0;
+      return acc + price * item.quantity;
+    }, 0);
+
     res.json({
       totalItems,
-      cartItems, // Flat, not nested inside 'items'
+      totalPrice,
+      cartItems,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 // Update quantity of a product in cart
